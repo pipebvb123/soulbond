@@ -114,8 +114,3 @@ if __name__ == "__main__":
 def view_orders():
     return render_template("orders.html", orders=orders)    
 
-@app.route("/orders")
-def view_orders():
-    if request.args.get("key") != "898369":
-        return "No autorizado"
-    return render_template("orders.html", orders=orders)
