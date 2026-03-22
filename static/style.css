@@ -88,3 +88,12 @@ body {
     font-size: 16px;
     cursor: pointer;
 }
+.cart-btn {
+    color: white;
+    text-decoration: none;
+    font-size: 20px;
+}
+
+form {
+    margin: 0;
+}
