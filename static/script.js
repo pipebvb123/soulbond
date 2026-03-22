@@ -1,1 +1,1 @@
-console.log('Soulbond PRO loaded');
+console.log("Soulbond activo");
