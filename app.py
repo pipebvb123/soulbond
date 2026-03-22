@@ -31,11 +31,16 @@ def product(id):
 @app.route("/add_to_cart/<int:id>")
 def add_to_cart(id):
     if "cart" not in session:
-        session["cart"] = []
+        session["cart"] = {}
 
-    session["cart"].append(id)
-    session.modified = True
+    cart = session["cart"]
 
+    if str(id) in cart:
+        cart[str(id)] += 1
+    else:
+        cart[str(id)] = 1
+
+    session["cart"] = cart
     return redirect("/")
 
 @app.route("/cart")
@@ -78,34 +83,28 @@ def admin():
     return render_template("admin.html", products=products)
 
 # 💳 CHECKOUT
-@app.route("/checkout")
+@app.route("/checkout", methods=["GET","POST"])
 def checkout():
-    items = []
+    if request.method == "POST":
+        contact = request.form["contact"]
 
-    total = 0
+        total = 0
+        conn = get_db()
 
-    conn = get_db()
+        for id, qty in session.get("cart", {}).items():
+            product = conn.execute("SELECT * FROM products WHERE id=?", (id,)).fetchone()
+            if product:
+                total += 10000 * int(qty)  # ejemplo
 
-    for id in session.get("cart", []):
-        product = conn.execute("SELECT * FROM products WHERE id=?", (id,)).fetchone()
-        if product:
-            items.append({
-                "title": product["name"],
-                "quantity": 1,
-                "currency_id": "CLP",
-                "unit_price": product["price"]
-            })
+        conn.execute("INSERT INTO orders (contact,total) VALUES (?,?)",(contact,total))
+        conn.commit()
+        conn.close()
 
-            total += product["price"]
+        session["cart"] = {}
 
-    # guardar pedido en DB
-    conn.execute("INSERT INTO orders (total) VALUES (?)", (total,))
-    conn.commit()
-    conn.close()
+        return "Compra realizada ✅ Te contactaremos"
 
-    preference = sdk.preference().create({"items": items})
-
-    return redirect(preference["response"]["init_point"])
+    return render_template("checkout.html")
 
 # 📦 VER PEDIDOS
 @app.route("/orders")
@@ -122,3 +121,19 @@ def view_orders():
 # 🚀 RUN
 if __name__ == "__main__":
     app.run(debug=True)
+
+@app.route("/login", methods=["GET","POST"])
+def login():
+    if request.method == "POST":
+        user = request.form["user"]
+        password = request.form["password"]
+
+        conn = get_db()
+        u = conn.execute("SELECT * FROM users WHERE username=? AND password=?", (user,password)).fetchone()
+        conn.close()
+
+        if u:
+            session["user"] = user
+            return redirect("/")
+    
+    return render_template("login.html")    
