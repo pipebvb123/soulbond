@@ -1,15 +1,20 @@
 from flask import Flask, render_template, request, redirect, session
+from database import get_db, init_db, seed_products
 import mercadopago
-from database import get_db, init_db
+
 
 app = Flask(__name__)
 app.secret_key = "soulbond_secret"
 
 init_db()
+seed_products()
 
-sdk = mercadopago.SDK("TEST-APP_USR-7609628854752746-032216-75ea60017159dcb348f58def7ebcbdd8-3284095970")
+sdk = mercadopago.SDK("TU_ACCESS_TOKEN_AQUI")
 
-# 🔹 Obtener productos desde DB
+
+
+
+
 def get_products():
     conn = get_db()
     products = conn.execute("SELECT * FROM products").fetchall()
@@ -43,6 +48,13 @@ def add_to_cart(id):
     session["cart"] = cart
     return redirect("/")
 
+@app.route("/remove/<int:id>")
+def remove(id):
+    cart = session.get("cart", {})
+    cart.pop(str(id), None)
+    session["cart"] = cart
+    return redirect("/cart")
+
 @app.route("/cart")
 def cart():
     cart_items = []
@@ -50,39 +62,19 @@ def cart():
 
     conn = get_db()
 
-    for id in session.get("cart", []):
+    for id, qty in session.get("cart", {}).items():
         product = conn.execute("SELECT * FROM products WHERE id=?", (id,)).fetchone()
         if product:
+            product = dict(product)
+            product["qty"] = qty
             cart_items.append(product)
-            total += product["price"]
+            total += product["price"] * qty
 
     conn.close()
 
     return render_template("cart.html", items=cart_items, total=total)
 
-# 🔐 ADMIN
-@app.route("/admin", methods=["GET", "POST"])
-def admin():
-    if request.args.get("key") != "898369":
-        return "No autorizado"
 
-    if request.method == "POST":
-        name = request.form["name"]
-        price = int(request.form["price"])
-        image = request.form["image"]
-
-        conn = get_db()
-        conn.execute(
-            "INSERT INTO products (name, price, image) VALUES (?, ?, ?)",
-            (name, price, image)
-        )
-        conn.commit()
-        conn.close()
-
-    products = get_products()
-    return render_template("admin.html", products=products)
-
-# 💳 CHECKOUT
 @app.route("/checkout", methods=["GET","POST"])
 def checkout():
     if request.method == "POST":
@@ -94,7 +86,7 @@ def checkout():
         for id, qty in session.get("cart", {}).items():
             product = conn.execute("SELECT * FROM products WHERE id=?", (id,)).fetchone()
             if product:
-                total += 10000 * int(qty)  # ejemplo
+                total += product["price"] * qty
 
         conn.execute("INSERT INTO orders (contact,total) VALUES (?,?)",(contact,total))
         conn.commit()
@@ -106,7 +98,7 @@ def checkout():
 
     return render_template("checkout.html")
 
-# 📦 VER PEDIDOS
+
 @app.route("/orders")
 def view_orders():
     if request.args.get("key") != "898369":
@@ -118,22 +110,7 @@ def view_orders():
 
     return render_template("orders.html", orders=orders)
 
-# 🚀 RUN
+
 if __name__ == "__main__":
     app.run(debug=True)
 
-@app.route("/login", methods=["GET","POST"])
-def login():
-    if request.method == "POST":
-        user = request.form["user"]
-        password = request.form["password"]
-
-        conn = get_db()
-        u = conn.execute("SELECT * FROM users WHERE username=? AND password=?", (user,password)).fetchone()
-        conn.close()
-
-        if u:
-            session["user"] = user
-            return redirect("/")
-    
-    return render_template("login.html")    

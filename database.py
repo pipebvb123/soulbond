@@ -9,35 +9,17 @@ def init_db():
     conn = get_db()
     cursor = conn.cursor()
 
-    # usuarios
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT,
-        password TEXT
-    )
-    """)
 
-    # productos
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS products (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT
+        name TEXT,
+        price INTEGER,
+        image TEXT
     )
     """)
 
-    # variantes (talla/color)
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS variants (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        product_id INTEGER,
-        color TEXT,
-        size TEXT,
-        price INTEGER
-    )
-    """)
 
-    # pedidos
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS orders (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,23 +27,21 @@ def init_db():
         total INTEGER
     )
     """)
+
+    conn.commit()
+    conn.close()
+
 def seed_products():
     conn = get_db()
 
-    # Skull cap
-    conn.execute("INSERT INTO products (name) VALUES ('Skull Cap')")
+    count = conn.execute("SELECT COUNT(*) FROM products").fetchone()[0]
 
-    # Short camuflados
-    conn.execute("INSERT INTO products (name) VALUES ('Short Camuflados')")
-
-    # Slim fit
-    conn.execute("INSERT INTO products (name) VALUES ('Polera Slim Fit')")
-
-    # Baby tee
-    conn.execute("INSERT INTO products (name) VALUES ('Baby Tee')")
-
-    # Poleras normales
-    conn.execute("INSERT INTO products (name) VALUES ('Poleras Clasicas')")
+    if count == 0:
+        conn.execute("INSERT INTO products (name, price, image) VALUES ('Skull Cap', 9990, '')")
+        conn.execute("INSERT INTO products (name, price, image) VALUES ('Short Camuflados', 19990, '')")
+        conn.execute("INSERT INTO products (name, price, image) VALUES ('Polera Slim Fit', 14990, '')")
+        conn.execute("INSERT INTO products (name, price, image) VALUES ('Baby Tee', 12990, '')")
+        conn.execute("INSERT INTO products (name, price, image) VALUES ('Poleras Clasicas', 10990, '')")
 
     conn.commit()
     conn.close()
