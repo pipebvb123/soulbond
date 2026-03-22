@@ -9,7 +9,7 @@ app.secret_key = "soulbond_secret"
 init_db()
 seed_products()
 
-sdk = mercadopago.SDK("TEST-APP_USR-7609628854752746-032216-75ea60017159dcb348f58def7ebcbdd8-3284095970S")
+sdk = mercadopago.SDK("TEST-APP_USR-7609628854752746-032216-75ea60017159dcb348f58def7ebcbdd8-3284095970")
 
 
 
@@ -115,6 +115,7 @@ def checkout():
     return render_template("checkout.html")
 
 
+
 @app.route("/orders")
 def view_orders():
     if request.args.get("key") != "898369":
@@ -127,8 +128,9 @@ def view_orders():
     return render_template("orders.html", orders=orders)
 
 
-import os
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+
+
+
+
+
