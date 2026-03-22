@@ -1,16 +1,27 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
 <h2 style="padding:20px;">Carrito</h2>
 
 {% for item in items %}
 <div class="card">
     <h3>{{ item.name }}</h3>
-    <p>${{ item.price }}</p>
+
+    <p>Precio: ${{ item.price }}</p>
+    <p>Cantidad: {{ item.qty }}</p>
+    <p>Subtotal: ${{ item.subtotal }}</p>
+
+    <a href="/remove/{{ item.id }}" class="btn">Eliminar</a>
 </div>
 {% endfor %}
 
 <h2 style="padding:20px;">Total: ${{ total }}</h2>
+
+<!-- BOTÓN CORRECTO -->
+<form action="/checkout" method="GET" style="padding:20px;">
+    <button class="btn">Comprar</button>
+</form>
+
 {% endblock %}
 
-<a href="/checkout" class="btn">Pagar</a>

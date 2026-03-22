@@ -35,18 +35,19 @@ def product(id):
 
 @app.route("/add_to_cart/<int:id>")
 def add_to_cart(id):
-    if "cart" not in session:
-        session["cart"] = {}
+    cart = session.get("cart", {})
 
-    cart = session["cart"]
+    id = str(id)
 
-    if str(id) in cart:
-        cart[str(id)] += 1
+    if id in cart:
+        cart[id] += 1
     else:
-        cart[str(id)] = 1
+        cart[id] = 1
 
     session["cart"] = cart
-    return redirect("/")
+    session.modified = True
+
+    return redirect("/cart")
 
 @app.route("/remove/<int:id>")
 def remove(id):
@@ -63,19 +64,27 @@ def cart():
     conn = get_db()
 
     for id, qty in session.get("cart", {}).items():
-        product = conn.execute("SELECT * FROM products WHERE id=?", (id,)).fetchone()
+        product = conn.execute(
+            "SELECT * FROM products WHERE id=?", (int(id),)
+        ).fetchone()
+
         if product:
             product = dict(product)
+
+            price = product.get("price") or 0
+
             product["qty"] = qty
+            product["subtotal"] = price * qty
+
             cart_items.append(product)
-            total += product["price"] * qty
+            total += price * qty
 
     conn.close()
 
     return render_template("cart.html", items=cart_items, total=total)
 
 
-@app.route("/checkout", methods=["GET","POST"])
+@app.route("/checkout", methods=["GET", "POST"])
 def checkout():
     if request.method == "POST":
         contact = request.form["contact"]
@@ -84,11 +93,18 @@ def checkout():
         conn = get_db()
 
         for id, qty in session.get("cart", {}).items():
-            product = conn.execute("SELECT * FROM products WHERE id=?", (id,)).fetchone()
-            if product:
-                total += product["price"] * qty
+            product = conn.execute(
+                "SELECT * FROM products WHERE id=?", (int(id),)
+            ).fetchone()
 
-        conn.execute("INSERT INTO orders (contact,total) VALUES (?,?)",(contact,total))
+            if product:
+                price = product["price"] or 0
+                total += price * qty
+
+        conn.execute(
+            "INSERT INTO orders (contact, total) VALUES (?, ?)",
+            (contact, total)
+        )
         conn.commit()
         conn.close()
 
