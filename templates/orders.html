@@ -7,10 +7,7 @@
 {% for order in orders %}
 <div class="card">
     <h3>Total: ${{ order.total }}</h3>
-
-    {% for item in order.items %}
-        <p>{{ item.name }}</p>
-    {% endfor %}
+    
 </div>
 {% endfor %}
 
