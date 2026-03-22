@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request, redirect, session
+import mercadopago
+sdk = mercadopago.SDK("TU_ACCESS_TOKEN")
 
 app = Flask(__name__)
 app.secret_key = "soulbond_secret"
@@ -51,3 +53,49 @@ def cart():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+@app.route("/checkout")
+def checkout():
+    items = []
+
+    for id in session.get("cart", []):
+        product = next((p for p in products if p["id"] == id), None)
+        if product:
+            items.append({
+                "title": product["name"],
+                "quantity": 1,
+                "currency_id": "CLP",
+                "unit_price": product["price"]
+            })
+
+    preference_data = {
+        "items": items,
+    }
+
+    preference = sdk.preference().create(preference_data)
+    return redirect(preference["response"]["init_point"])  
+
+@app.route("/admin", methods=["GET", "POST"])
+def admin():
+    if request.method == "POST":
+        name = request.form["name"]
+        price = int(request.form["price"])
+        image = request.form["image"]
+
+        new_product = {
+            "id": len(products) + 1,
+            "name": name,
+            "price": price,
+            "image": image,
+            "rating": 5
+        }
+
+        products.append(new_product)
+
+    return render_template("admin.html", products=products)
+
+@app.route("/admin")
+def admin():
+    password = request.args.get("key")
+    if password != "898369":
+        return "No autorizado"

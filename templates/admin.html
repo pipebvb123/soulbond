@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2 style="padding:20px;">Panel Admin</h2>
+
+<form method="POST" style="padding:20px;">
+    <input name="name" placeholder="Nombre"><br><br>
+    <input name="price" placeholder="Precio"><br><br>
+    <input name="image" placeholder="URL imagen"><br><br>
+    <button class="btn">Agregar producto</button>
+</form>
+
+{% for p in products %}
+<div class="card">
+    <h3>{{ p.name }}</h3>
+    <p>${{ p.price }}</p>
+</div>
+{% endfor %}
+
+{% endblock %}
