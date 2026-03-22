@@ -9,7 +9,7 @@ app.secret_key = "soulbond_secret"
 init_db()
 seed_products()
 
-sdk = mercadopago.SDK("TU_ACCESS_TOKEN_AQUI")
+sdk = mercadopago.SDK("TEST-APP_USR-7609628854752746-032216-75ea60017159dcb348f58def7ebcbdd8-3284095970S")
 
 
 
