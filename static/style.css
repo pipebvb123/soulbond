@@ -1,0 +1,51 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0a0a0a;
+    color: white;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    background: black;
+    border-bottom: 1px solid #222;
+}
+
+.logo {
+    color: #a855f7;
+}
+
+.search {
+    background: #111;
+    border: none;
+    padding: 10px;
+    color: white;
+    border-radius: 5px;
+}
+
+.hero {
+    padding: 40px;
+    text-align: center;
+    font-size: 30px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 25px;
+    padding: 30px;
+}
+
+.card {
+    background: #111;
+    padding: 15px;
+    border-radius: 12px;
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 20px rgba(168,85,247,0.3);
+}
