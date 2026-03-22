@@ -1,15 +1,16 @@
 from flask import Flask, render_template, request, redirect, session
 import mercadopago
-sdk = mercadopago.SDK("TU_ACCESS_TOKEN")
+
 
 app = Flask(__name__)
 app.secret_key = "soulbond_secret"
 
+sdk = mercadopago.SDK("TEST-APP_USR-7609628854752746-032216-75ea60017159dcb348f58def7ebcbdd8-3284095970")
+
 products = [
     {"id": 1, "name": "Soulbond Hoodie Black", "price": 29990, "image": "https://via.placeholder.com/400", "rating": 5},
     {"id": 2, "name": "Soulbond Tee Purple", "price": 19990, "image": "https://via.placeholder.com/400", "rating": 4},
-    {"id": 3, "name": "Soulbond Oversize Tee", "price": 24990, "image": "https://via.placeholder.com/400", "rating": 5},
-    {"id": 4, "name": "Soulbond Essentials Hoodie", "price": 34990, "image": "https://via.placeholder.com/400", "rating": 4},
+
 ]
 
 @app.route("/")
@@ -51,9 +52,29 @@ def cart():
 
     return render_template("cart.html", items=cart_items, total=total)
 
-if __name__ == "__main__":
-    app.run(debug=True)
+# 🔐 ADMIN PROTEGIDO
+@app.route("/admin", methods=["GET", "POST"])
+def admin():
+    password = request.args.get("key")
+    if password != "898369":
+        return "No autorizado"
 
+    if request.method == "POST":
+        name = request.form["name"]
+        price = int(request.form["price"])
+        image = request.form["image"]
+
+        products.append({
+            "id": len(products) + 1,
+            "name": name,
+            "price": price,
+            "image": image,
+            "rating": 5
+        })
+
+    return render_template("admin.html", products=products)
+
+# 💳 CHECKOUT
 @app.route("/checkout")
 def checkout():
     items = []
@@ -68,34 +89,9 @@ def checkout():
                 "unit_price": product["price"]
             })
 
-    preference_data = {
-        "items": items,
-    }
+    preference = sdk.preference().create({"items": items})
+    return redirect(preference["response"]["init_point"])
 
-    preference = sdk.preference().create(preference_data)
-    return redirect(preference["response"]["init_point"])  
-
-@app.route("/admin", methods=["GET", "POST"])
-def admin():
-    if request.method == "POST":
-        name = request.form["name"]
-        price = int(request.form["price"])
-        image = request.form["image"]
-
-        new_product = {
-            "id": len(products) + 1,
-            "name": name,
-            "price": price,
-            "image": image,
-            "rating": 5
-        }
-
-        products.append(new_product)
-
-    return render_template("admin.html", products=products)
-
-@app.route("/admin")
-def admin():
-    password = request.args.get("key")
-    if password != "898369":
-        return "No autorizado"
+# 🚀 RUN
+if __name__ == "__main__":
+    app.run(debug=True)
