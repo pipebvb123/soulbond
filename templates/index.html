@@ -9,18 +9,11 @@
 <div class="grid">
     {% for product in products %}
     <div class="card">
-        <img src="{{ product.image }}">
+        <img src="{{ product.image if product.image else 'https://via.placeholder.com/300' }}">
+
         <h3>{{ product.name }}</h3>
 
-        <p>
-{% if product.rating %}
-    {% for i in range(product.rating) %}
-    ⭐
-    {% endfor %}
-{% endif %}
-        </p>
-
-        <p>${{ product.price }}</p>
+        <p>${{ product.price if product.price else 0 }}</p>
 
         <a href="/product/{{ product.id }}" class="btn">Ver</a>
         <a href="/add_to_cart/{{ product.id }}" class="btn">Agregar</a>
