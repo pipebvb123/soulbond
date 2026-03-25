@@ -45,3 +45,5 @@ def seed_products():
 
     conn.commit()
     conn.close()
+
+    
