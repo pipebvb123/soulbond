@@ -81,33 +81,33 @@ def cart():
 def checkout():
     if request.method == "POST":
         contact = request.form["contact"]
-        method = request.form["payment_method"]
+
 
         total = 0
         conn = get_db()
 
         for id, qty in session.get("cart", {}).items():
-            product = conn.execute("SELECT * FROM products WHERE id=?", (int(id),)).fetchone()
+            product = conn.execute(
+                "SELECT * FROM products WHERE id=?", (int(id),)
+            ).fetchone()
 
             if product:
                 total += (product["price"] or 0) * qty
 
-        conn.execute("INSERT INTO orders (contact, total) VALUES (?, ?)", (contact, total))
+        conn.execute(
+            "INSERT INTO orders (contact, total) VALUES (?, ?)",
+            (contact, total)
+        )
         conn.commit()
         conn.close()
 
         session["cart"] = {}
 
-        # 💳 TARJETA → redirige a pago externo (simulado)
-        if method == "card":
-            return render_template("success.html", total=total)
+        import urllib.parse
+        mensaje = urllib.parse.quote(f"Hola! hice un pedido por ${total}")
+        link = f"https://wa.me/56992508009?text={mensaje}"
 
-        # 🏦 TRANSFERENCIA → muestra datos + WhatsApp
-        if method == "transfer":
-            mensaje = urllib.parse.quote(f"Hola! hice un pedido por ${total}")
-            link = f"https://wa.me/56992508009?text={mensaje}"
-
-            return render_template("transfer.html", total=total, link=link)
+        return render_template("transfer.html", total=total, link=link)
 
     return render_template("checkout.html")
 

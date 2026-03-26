@@ -37,11 +37,11 @@ def seed_products():
     count = conn.execute("SELECT COUNT(*) FROM products").fetchone()[0]
 
     if count == 0:
-        conn.execute("INSERT INTO products (name, price, image) VALUES ('Skull Cap', 9990, '')")
-        conn.execute("INSERT INTO products (name, price, image) VALUES ('Short Camuflados', 19990, '')")
-        conn.execute("INSERT INTO products (name, price, image) VALUES ('Polera Slim Fit', 14990, '')")
-        conn.execute("INSERT INTO products (name, price, image) VALUES ('Baby Tee', 12990, '')")
-        conn.execute("INSERT INTO products (name, price, image) VALUES ('Poleras Clasicas', 10990, '')")
+        conn.execute("INSERT INTO products (name, price, image) VALUES ('Skull Cap', 9990, 'https://via.placeholder.com/300')")
+        conn.execute("INSERT INTO products (name, price, image) VALUES ('Short Camuflados', 19990, 'https://via.placeholder.com/300')")
+        conn.execute("INSERT INTO products (name, price, image) VALUES ('Polera Slim Fit', 14990, 'https://via.placeholder.com/300')")
+        conn.execute("INSERT INTO products (name, price, image) VALUES ('Baby Tee', 12990, 'https://via.placeholder.com/300')")
+        conn.execute("INSERT INTO products (name, price, image) VALUES ('Poleras Clasicas', 10990, 'https://via.placeholder.com/300')")
 
     conn.commit()
     conn.close()
