@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Finalizar compra</h2>
+
+<form method="POST">
+    <input name="contact" placeholder="WhatsApp o Email" required>
+
+    <select name="payment_method">
+        <option value="card">Pagar con tarjeta</option>
+        <option value="transfer">Transferencia bancaria</option>
+    </select>
+
+    <button class="btn">Continuar</button>
+</form>
+
+{% endblock %}

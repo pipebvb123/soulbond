@@ -2,12 +2,12 @@
 
 {% block content %}
 
-<h2 style="padding:20px;">Pedidos</h2>
+<h2>Pedidos</h2>
 
-{% for order in orders %}
+{% for o in orders %}
 <div class="card">
-    <h3>Total: ${{ order.total }}</h3>
-    
+    <p>Total: ${{ o.total }}</p>
+    <p>Contacto: {{ o.contact }}</p>
 </div>
 {% endfor %}
 

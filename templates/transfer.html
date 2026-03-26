@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Pago por transferencia</h2>
+
+<p>Total: ${{ total }}</p>
+
+<p>Banco: BancoEstado</p>
+<p>Cuenta: 12345678</p>
+<p>Nombre: Soulbond</p>
+
+<a href="{{ link }}" class="btn">Enviar comprobante por WhatsApp</a>
+
+{% endblock %}

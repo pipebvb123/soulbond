@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, redirect, session
 from database import get_db, init_db, seed_products
-import mercadopago
-
+import urllib.parse
 
 app = Flask(__name__)
 app.secret_key = "soulbond_secret"
@@ -9,12 +8,7 @@ app.secret_key = "soulbond_secret"
 init_db()
 seed_products()
 
-sdk = mercadopago.SDK("TEST-APP_USR-7609628854752746-032216-75ea60017159dcb348f58def7ebcbdd8-3284095970")
-
-
-
-
-
+# 🔹 PRODUCTOS
 def get_products():
     conn = get_db()
     products = conn.execute("SELECT * FROM products").fetchall()
@@ -33,6 +27,7 @@ def product(id):
     conn.close()
     return render_template("product.html", product=product)
 
+# 🛒 CARRITO
 @app.route("/add_to_cart/<int:id>")
 def add_to_cart(id):
     cart = session.get("cart", {})
@@ -45,7 +40,7 @@ def add_to_cart(id):
         cart[id] = 1
 
     session["cart"] = cart
-    session.modified = True
+
 
     return redirect("/cart")
 
@@ -64,13 +59,11 @@ def cart():
     conn = get_db()
 
     for id, qty in session.get("cart", {}).items():
-        product = conn.execute(
-            "SELECT * FROM products WHERE id=?", (int(id),)
-        ).fetchone()
+        product = conn.execute("SELECT * FROM products WHERE id=?", (int(id),)).fetchone()
 
         if product:
             product = dict(product)
-
+            
             price = product.get("price") or 0
 
             product["qty"] = qty
@@ -83,41 +76,44 @@ def cart():
 
     return render_template("cart.html", items=cart_items, total=total)
 
-
+# 💳 CHECKOUT
 @app.route("/checkout", methods=["GET", "POST"])
 def checkout():
     if request.method == "POST":
         contact = request.form["contact"]
+        method = request.form["payment_method"]
 
         total = 0
         conn = get_db()
 
         for id, qty in session.get("cart", {}).items():
-            product = conn.execute(
-                "SELECT * FROM products WHERE id=?", (int(id),)
-            ).fetchone()
+            product = conn.execute("SELECT * FROM products WHERE id=?", (int(id),)).fetchone()
 
             if product:
-                price = product["price"] or 0
-                total += price * qty
+                total += (product["price"] or 0) * qty
 
-        conn.execute(
-            "INSERT INTO orders (contact, total) VALUES (?, ?)",
-            (contact, total)
-        )
+        conn.execute("INSERT INTO orders (contact, total) VALUES (?, ?)", (contact, total))
         conn.commit()
         conn.close()
 
         session["cart"] = {}
 
-        return "Compra realizada ✅ Te contactaremos"
+        # 💳 TARJETA → redirige a pago externo (simulado)
+        if method == "card":
+            return render_template("success.html", total=total)
+
+        # 🏦 TRANSFERENCIA → muestra datos + WhatsApp
+        if method == "transfer":
+            mensaje = urllib.parse.quote(f"Hola! hice un pedido por ${total}")
+            link = f"https://wa.me/56992508009?text={mensaje}"
+
+            return render_template("transfer.html", total=total, link=link)
 
     return render_template("checkout.html")
 
-
-
+# 📦 PEDIDOS
 @app.route("/orders")
-def view_orders():
+def orders():
     if request.args.get("key") != "898369":
         return "No autorizado"
 
