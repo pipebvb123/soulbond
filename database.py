@@ -30,6 +30,7 @@ def init_db():
 
     conn.commit()
     conn.close()
+#aqui podemos ver todo el tema que es items
 
 def seed_products():
     conn = get_db()
