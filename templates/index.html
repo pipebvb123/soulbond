@@ -9,7 +9,7 @@
 <div class="grid">
     {% for product in products %}
     <div class="card">
-        <img src="{{ product.image if product.image else 'https://via.placeholder.com/300' }}">
+       <img src="{{ url_for('static', filename=product.image) }}">
 
         <h3>{{ product.name }}</h3>
 
