@@ -10,7 +10,7 @@
     {% for product in products %}
     <div class="card">
        <img src="{{ url_for('static', filename=product.image) }}">
-
+       
         <h3>{{ product.name }}</h3>
 
         <p>${{ product.price if product.price else 0 }}</p>
